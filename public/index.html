@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les Cinq Compagnons · jeu de cartes</title>
+<meta name="description" content="Jeu de cartes en ligne de 2 à 7 joueurs : cinq maisons, onze manches, un seul roi.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Lora:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="index.html">LES CINQ COMPAGNONS</a>
+  <nav class="nav" aria-label="Navigation principale"><a href="index.html" aria-current="page">Jouer</a><a href="rules.html">Règles</a></nav>
+</header>
+<main class="wrap">
+  <section class="hero" aria-labelledby="titre">
+    <div class="box">
+      <h1 id="titre">Cinq maisons.<br>Onze manches.<br>Un seul roi.</h1>
+      <p style="margin:20px 0 0;font-size:22px;color:#f2f4e6">Un jeu de cartes à jouer entre amis, de 2 à 7 joueurs. Rangez votre main en brelans et en suites avant vos adversaires et remportez la victoire.</p>
+      <div class="orn" style="margin:24px 0"><i></i></div>
+      <p id="gone" class="err" role="alert" hidden>Cette partie n’existe plus (le serveur a pu redémarrer). Vous pouvez en créer une nouvelle.</p>
+      <div class="row" style="margin-bottom:16px" id="resume" hidden>
+        <a class="btn btn-p" id="resumeBtn" href="play.html">Reprendre ma partie</a>
+        <button class="btn btn-s" id="dropBtn" type="button">Abandonner cette partie</button>
+      </div>
+      <form id="f" class="row" style="gap:14px" autocomplete="off">
+        <label for="nm" style="position:absolute;left:-9999px">Votre prénom</label>
+        <input id="nm" type="text" maxlength="16" placeholder="Votre prénom" required style="width:210px">
+        <button class="btn btn-p" type="button" id="create">Créer une partie</button>
+        <button class="btn btn-s" type="button" id="solo">S’entraîner contre des bots</button>
+      </form>
+      <form id="j" class="row" style="gap:10px;margin-top:14px" autocomplete="off">
+        <label for="code" style="position:absolute;left:-9999px">Code de la partie</label>
+        <input id="code" type="text" maxlength="6" placeholder="Code de partie" style="width:210px;text-transform:uppercase">
+        <button class="btn btn-s" type="submit">Rejoindre</button>
+      </form>
+      <p id="msg" class="err" role="alert" hidden></p>
+      <p class="dim" style="margin:20px 0 0;font-size:18px">Gratuit · sans compte · environ 30 minutes</p>
+    </div>
+    <div class="fan" aria-hidden="true" id="fan"></div>
+  </section>
+  <section aria-labelledby="t3" style="padding-top:10px">
+    <h2 id="t3" class="ribbon" style="font-size:38px">Comment jouer, en trois gestes</h2>
+    <div class="steps">
+      <div class="panel"><div class="n">1</div><h3 style="margin:10px 0 6px;font-size:19px">Piochez</h3><p style="margin:0">À votre tour, prenez une carte sur la pioche ou la dernière carte de la défausse.</p></div>
+      <div class="panel"><div class="n">2</div><h3 style="margin:10px 0 6px;font-size:19px">Formez brelans et suites</h3><p style="margin:0">Un brelan : 3 cartes de même valeur ou plus. Une suite : 3 cartes qui se suivent dans la même maison. Les Atouts et les Jokers complètent.</p></div>
+      <div class="panel"><div class="n">3</div><h3 style="margin:10px 0 6px;font-size:19px">Clôturez la manche</h3><p style="margin:0">Quand tout est rangé en brelans et en suites, défaussez votre dernière carte : le moins de points gagne.</p></div>
+    </div>
+    <p style="margin:20px 0 0"><a class="link" href="rules.html">Lire les règles complètes</a></p>
+  </section>
+</main>
+<footer class="foot">
+  <span>Les Cinq Compagnons</span>
+  <a class="link" href="rules.html">Aide et règles</a>
+  <button type="button" id="privBtn" aria-expanded="false">Confidentialité</button>
+  <p id="priv" hidden style="flex-basis:100%;margin:4px 0 0;max-width:760px">Pas de compte. Votre prénom et le code de votre partie sont gardés dans votre navigateur pour vous permettre de reprendre une partie ; le serveur ne conserve une partie que le temps qu’elle dure, puis l’oublie. Les polices d’écriture sont chargées depuis Google Fonts.</p>
+</footer>
+<script src="game.js"></script>
+<script src="cards.js"></script>
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const get=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+  const fan=[['3','loutre'],['7','grenouille'],['R','chat'],['S','hibou'],['10','raton']];
+  $('#fan').innerHTML=fan.map(([r,a],i)=>'<div style="font-size:19px;transform:rotate('+((i-2)*7)+'deg) translateY('+Math.abs(i-2)*10+'px)">'+cardHTML({a:a,r:r})+'</div>').join('');
+  $('#nm').value=get('c5k-name')||'';
+  let sess=null;try{sess=JSON.parse(get('c5k-session')||'null')}catch(e){}
+  if(sess){$('#resume').hidden=false;$('#resumeBtn').textContent='Reprendre ma partie · '+sess.code;$('#resumeBtn').href='play.html?c='+sess.code}
+  if(location.search.indexOf('gone=1')>=0)$('#gone').hidden=false;
+  $('#dropBtn').onclick=()=>{try{localStorage.removeItem('c5k-session')}catch(e){}$('#resume').hidden=true};
+  const name=()=>{const n=$('#nm').value.trim();if(!n){$('#msg').textContent='Entrez d’abord votre prénom.';$('#msg').hidden=false;$('#nm').focus();return null}try{localStorage.setItem('c5k-name',n)}catch(e){}return n};
+  const go=(i)=>{try{sessionStorage.setItem('c5k-intent',JSON.stringify(i));localStorage.removeItem('c5k-session')}catch(e){}location.href='play.html'};
+  $('#create').onclick=()=>{const n=name();if(n)go({t:'create',name:n})};
+  $('#solo').onclick=()=>{const n=name();if(n)go({t:'create',name:n,solo:true})};
+  $('#j').onsubmit=e=>{e.preventDefault();const n=name();if(!n)return;const c=$('#code').value.toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){$('#msg').textContent='Entrez le code de la partie.';$('#msg').hidden=false;return}go({t:'join',name:n,code:c})};
+  $('#privBtn').onclick=()=>{const p=$('#priv');p.hidden=!p.hidden;$('#privBtn').setAttribute('aria-expanded',String(!p.hidden))};
+})();
+</script>
+</body>
+</html>
